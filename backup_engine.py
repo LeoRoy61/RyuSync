@@ -16,6 +16,12 @@ Motore locale: shutil
 
 from __future__ import annotations
 
+import sys
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
+
 import hashlib
 import json
 import logging
@@ -343,7 +349,7 @@ def backup_additive(
 
     # Setup log
     if log_path is None:
-        log_dir = Path("logs")
+        log_dir = Path(__file__).parent / "logs"
         log_dir.mkdir(exist_ok=True)
         log_path = log_dir / f"backup_log_{result.timestamp}.txt"
 
@@ -395,14 +401,15 @@ def _build_content_paths(contents: list[str], structure: dict) -> list[Path]:
 
 
 def _is_local_destination(dst: str) -> bool:
-    """Determina se la destinazione è locale (Windows drive letter o UNC path)."""
-    # Path locale: X:\... o \\server\share\...
-    return bool(
-        re.match(r'^[A-Za-z]:\\', dst) or
-        dst.startswith("\\\\") or
-        dst.startswith("//") or
-        Path(dst).exists()
-    )
+    """Determina se la destinazione è locale (Windows drive letter o UNC path o path relativo)."""
+    if not dst:
+        return False
+    dst_str = str(dst)
+    if ":" not in dst_str:
+        return True
+    drive_or_remote = dst_str.split(":")[0]
+    return len(drive_or_remote) == 1 and drive_or_remote.isalpha()
+
 
 
 # ---------------------------------------------------------------------------
@@ -545,19 +552,24 @@ def _backup_rclone_item(
     Copia un file/cartella verso un remote rclone.
     Usa SEMPRE 'rclone copy' (mai 'rclone sync' distruttivo).
     """
+    dst_remote = Path(dst_remote).as_posix()
     try:
         rel = src_item.relative_to(ryujinx_base)
     except ValueError:
         rel = Path(src_item.name)
 
+    rel_posix = rel.as_posix()
+
     if src_item.is_dir():
-        dst_path = f"{dst_remote}/{rel}"
+        dst_path = f"{dst_remote}/{rel_posix}"
     else:
-        dst_path = f"{dst_remote}/{rel.parent}" if rel.parent != Path(".") else dst_remote
+        dst_path = f"{dst_remote}/{rel.parent.as_posix()}" if rel.parent != Path(".") else dst_remote
+
+    dst_path = Path(dst_path).as_posix()
 
     # Prima controlla lo stato del file sul remote
     if src_item.is_file():
-        remote_meta = _get_rclone_file_meta(dst_remote, str(rel), method)
+        remote_meta = _get_rclone_file_meta(dst_remote, rel_posix, method)
         status = compare_files(src_item, remote_meta, method=method)
 
         if status == FileStatus.IDENTICAL:
@@ -565,13 +577,14 @@ def _backup_rclone_item(
             return
 
         if status == FileStatus.CONFLICT:
-            _handle_conflict_rclone(src_item, dst_remote, str(rel), pc_name, dry_run, result)
+            _handle_conflict_rclone(src_item, dst_remote, rel_posix, pc_name, dry_run, result)
             return
 
         if status == FileStatus.NEWER_REMOTE:
             result.conflicts.append(f"[REMOTO_PIÙ_RECENTE] {src_item}")
             logger.warning(f"[CONFLICT] Remoto più recente: {src_item}")
             return
+
 
     # Esegui rclone copy
     cmd = ["rclone", "copy"]
@@ -596,7 +609,7 @@ def _backup_rclone_item(
         return
 
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
         if proc.returncode == 0:
             result.copied.append(str(src_item))
             if src_item.is_file():
@@ -618,6 +631,8 @@ def _get_rclone_file_meta(remote: str, rel_path: str, method: str) -> dict:
     Recupera metadati di un file su un remote rclone.
     Usa 'rclone lsjson' per ottenere size e mtime.
     """
+    remote = Path(remote).as_posix()
+    rel_path = Path(rel_path).as_posix()
     remote_file = f"{remote}/{rel_path}"
     cmd = ["rclone", "lsjson", "--files-only", remote_file]
     try:
@@ -657,13 +672,15 @@ def _handle_conflict_rclone(
 ) -> None:
     """Gestisce un conflitto rclone salvando entrambe le versioni."""
     safe_pc_name = re.sub(r'[^\w\-]', '_', pc_name or "PC1")
-    stem = Path(rel_path).stem
-    suffix = Path(rel_path).suffix
-    parent = str(Path(rel_path).parent)
+    rel_path_pure = Path(rel_path)
+    stem = rel_path_pure.stem
+    suffix = rel_path_pure.suffix
+    parent = rel_path_pure.parent.as_posix()
     prefix = f"{parent}/" if parent != "." else ""
 
     conflict_local_name = f"{prefix}{stem}_CONFLICT_{safe_pc_name}{suffix}"
     conflict_remote_name = f"{prefix}{stem}_CONFLICT_REMOTE{suffix}"
+
 
     if dry_run:
         console.print(
@@ -822,10 +839,12 @@ def _restore_rclone(
     result: BackupResult,
 ) -> None:
     """Ripristina da remote rclone."""
+    src_remote = Path(src_remote).as_posix()
+    dst_posix = Path(dst).as_posix()
     cmd = ["rclone", "copy"]
     if dry_run:
         cmd.append("--dry-run")
-    cmd.extend([src_remote, str(dst), "--progress", "--no-update-modtime"])
+    cmd.extend([src_remote, dst_posix, "--progress", "--no-update-modtime"])
 
     logger.info(f"[RCLONE RESTORE] {' '.join(cmd)}")
 
@@ -993,7 +1012,7 @@ def verify_backup_integrity(
                 if method == "sha256":
                     remote_meta["sha256"] = _compute_sha256(dst_file)
             else:
-                remote_meta = _get_rclone_file_meta(dst, str(rel), method)
+                remote_meta = _get_rclone_file_meta(dst, rel.as_posix(), method)
                 if not remote_meta:
                     report["missing"].append(str(rel))
                     continue

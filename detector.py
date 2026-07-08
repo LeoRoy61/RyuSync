@@ -157,11 +157,39 @@ def _find_portable_mode_windows() -> list[Path]:
     for common_dir in common_dirs:
         try:
             if common_dir.exists():
-                for exe in common_dir.rglob("Ryujinx.exe"):
-                    if exe not in ryujinx_exe_paths:
-                        ryujinx_exe_paths.append(exe)
-                        break  # Prende solo il primo per cartella
-        except (PermissionError, OSError):
+                # Check depth 0: directly in the common directory
+                exe0 = common_dir / "Ryujinx.exe"
+                try:
+                    if exe0.is_file() and exe0 not in ryujinx_exe_paths:
+                        ryujinx_exe_paths.append(exe0)
+                except (OSError, PermissionError):
+                    pass
+
+                # Check depth 1 and depth 2 using iterdir()
+                try:
+                    for entry in common_dir.iterdir():
+                        try:
+                            if entry.is_dir():
+                                # Depth 1: entry / "Ryujinx.exe"
+                                exe1 = entry / "Ryujinx.exe"
+                                if exe1.is_file() and exe1 not in ryujinx_exe_paths:
+                                    ryujinx_exe_paths.append(exe1)
+
+                                # Depth 2: entry / "publish" / "Ryujinx.exe" or entry / "ryujinx-publish" / "Ryujinx.exe"
+                                for pub_name in ("publish", "ryujinx-publish"):
+                                    pub_dir = entry / pub_name
+                                    try:
+                                        if pub_dir.is_dir():
+                                            exe2 = pub_dir / "Ryujinx.exe"
+                                            if exe2.is_file() and exe2 not in ryujinx_exe_paths:
+                                                ryujinx_exe_paths.append(exe2)
+                                    except (OSError, PermissionError):
+                                        pass
+                        except (OSError, PermissionError):
+                            pass
+                except (OSError, PermissionError):
+                    pass
+        except (OSError, PermissionError):
             pass
 
     # Cerca nel registro Windows (App Paths)

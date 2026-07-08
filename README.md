@@ -85,12 +85,10 @@ Follow these steps in the interactive menu:
 3. Storage: type `drive` and press Enter
 4. Client ID and Secret: leave empty (press Enter)
 5. Scope: `1` (full access)
-6. Root folder ID: leave empty
-7. Service account: leave empty
-8. Edit advanced config: `n`
-9. Use auto config: `y` → browser will open for Google OAuth authentication
-10. Team Drive: `n`
-11. Confirm with `y`
+6. Service account: leave empty
+7. Use auto config: `y` → browser will open for Google OAuth authentication
+8. Team Drive: `n`
+9. Confirm with `y`
 
 Verify:
 ```bash
@@ -98,9 +96,11 @@ rclone listremotes
 # Expected output: gdrive:
 ```
 
-> **💡 Minimal OAuth permissions recommended**: instead of granting access to your entire Google Drive,
-> you can restrict rclone to a dedicated folder (e.g. `RyuSync/`).
-> At step 6, specify the **Root folder ID** of your backup folder (visible in the Google Drive URL).
+> **💡 Note on Advanced Configuration (Root folder ID / Minimal Permissions)**:
+> If you want to restrict rclone to a dedicated folder (highly recommended for minimal OAuth permissions, e.g. `RyuSync/`):
+> 1. When prompted with `Edit advanced config?`, choose `y`.
+> 2. Look for the `Root folder ID` prompt and paste the ID of your backup folder (visible in the Google Drive URL).
+> 3. For all other advanced configuration prompts, you can press Enter to accept the defaults.
 > This way rclone can ONLY access that specific folder.
 
 ### OneDrive
@@ -294,7 +294,7 @@ Instead of granting access to your entire Google Drive:
 
 1. Create a dedicated folder on Google Drive (e.g. `RyuSync_Backup`)
 2. Copy its **folder ID** from the URL: `drive.google.com/drive/folders/`**`1ABC...XYZ`**
-3. During `rclone config`, at the "Root folder ID" step, paste this ID
+3. During `rclone config`, choose `y` to edit advanced config and, at the "Root folder ID" step, paste this ID
 4. rclone will be able to access **only** that folder
 
 ### Local Config File Protection

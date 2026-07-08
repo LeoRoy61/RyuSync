@@ -24,10 +24,24 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+# Riconfigura la codifica standard in UTF-8 su Windows per evitare crash con Emoji/Banner Unicode
+if sys.platform == "win32":
+    if sys.stdout is not None:
+        try:
+            sys.stdout.reconfigure(encoding="utf-8")
+        except (AttributeError, ValueError, OSError):
+            pass
+    if sys.stderr is not None:
+        try:
+            sys.stderr.reconfigure(encoding="utf-8")
+        except (AttributeError, ValueError, OSError):
+            pass
+
 # Verifica Python 3.10+
 if sys.version_info < (3, 10):
     print("❌ RyuSync richiede Python 3.10 o superiore.")
     sys.exit(1)
+
 
 import yaml
 from rich.console import Console
@@ -304,22 +318,22 @@ def prompt_contents(current_config: dict) -> list[str]:
 
     current_contents = current_config.get("contents", DEFAULT_CONFIG["contents"])
 
-    # Pre-seleziona in base a config corrente
-    defaults = [
-        label for label, key in choices_map.items()
-        if current_contents.get(key, False)
-    ]
+    # Costruisci i Choice di questionary con lo stato di checked
+    choices = []
+    for label, key in choices_map.items():
+        is_checked = current_contents.get(key, False)
+        choices.append(questionary.Choice(label, checked=is_checked))
 
     selected = questionary.checkbox(
         "Seleziona i contenuti da includere:",
-        choices=list(choices_map.keys()),
-        default=defaults,
+        choices=choices,
     ).ask()
 
     if selected is None:
         return []
 
     return [choices_map[label] for label in selected]
+
 
 
 # ---------------------------------------------------------------------------
@@ -493,9 +507,12 @@ def run_interactive(config: dict, dry_run: bool = False) -> None:
 
         # Compressione opzionale
         if config.get("compress_before_upload") and not dry_run:
+            log_dir = Path(config.get("log_dir") or "logs")
+            if not log_dir.is_absolute():
+                log_dir = Path(__file__).parent / log_dir
             zip_path = backup_engine.compress_backup(
                 ryujinx_path,
-                Path(config.get("log_dir", "logs")).parent / "backups",
+                log_dir.parent / "backups",
                 compression_level=config.get("compression_level", 6),
             )
             backup_engine.apply_retention(
@@ -604,8 +621,11 @@ def run_incremental_silent(config: dict, dry_run: bool = False) -> None:
     Se nulla di nuovo → termina silenziosamente.
     """
     # Setup logging su file (senza output console ricco)
-    log_path = LOG_DIR / f"backup_log_{backup_engine.BackupResult().timestamp}.txt"
-    LOG_DIR.mkdir(parents=True, exist_ok=True)
+    log_dir = Path(config.get("log_dir") or "logs")
+    if not log_dir.is_absolute():
+        log_dir = Path(__file__).parent / log_dir
+    log_path = log_dir / f"backup_log_{backup_engine.BackupResult().timestamp}.txt"
+    log_dir.mkdir(parents=True, exist_ok=True)
 
     logging.basicConfig(
         level=logging.INFO,
@@ -679,7 +699,9 @@ def run_incremental_silent(config: dict, dry_run: bool = False) -> None:
 def setup_logging_session(config: dict) -> Path:
     """Configura logging per la sessione interattiva."""
     from datetime import datetime
-    log_dir = Path(config.get("log_dir", "logs"))
+    log_dir = Path(config.get("log_dir") or "logs")
+    if not log_dir.is_absolute():
+        log_dir = Path(__file__).parent / log_dir
     log_dir.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     log_path = log_dir / f"backup_log_{timestamp}.txt"

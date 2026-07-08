@@ -185,6 +185,59 @@ class TestDetectWindowsPortable:
 
         assert not any(p == install_dir / "portable" for p in results)
 
+    def test_find_portable_mode_windows_depths(self, tmp_path, monkeypatch) -> None:
+        """Verifica che _find_portable_mode_windows trovi Ryujinx.exe a diversi livelli di profondità."""
+        # Configura l'ambiente in modo che LOCALAPPDATA punti a tmp_path
+        monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
+        # Rimuove altre fonti (PATH, registro)
+        monkeypatch.setenv("PATH", "")
+
+        programs_dir = tmp_path / "Programs"
+        programs_dir.mkdir()
+
+        # 1. Profondità 0
+        exe0 = programs_dir / "Ryujinx.exe"
+        exe0.write_bytes(b"MZ")
+        port0 = programs_dir / "portable"
+        port0.mkdir()
+
+        # 2. Profondità 1
+        sub1 = programs_dir / "sub1"
+        sub1.mkdir()
+        exe1 = sub1 / "Ryujinx.exe"
+        exe1.write_bytes(b"MZ")
+        port1 = sub1 / "portable"
+        port1.mkdir()
+
+        # 3. Profondità 2 (publish)
+        sub2 = programs_dir / "sub2"
+        sub2.mkdir()
+        pub2 = sub2 / "publish"
+        pub2.mkdir()
+        exe2 = pub2 / "Ryujinx.exe"
+        exe2.write_bytes(b"MZ")
+        port2 = pub2 / "portable"
+        port2.mkdir()
+
+        # 4. Profondità 2 (ryujinx-publish)
+        sub3 = programs_dir / "sub3"
+        sub3.mkdir()
+        pub3 = sub3 / "ryujinx-publish"
+        pub3.mkdir()
+        exe3 = pub3 / "Ryujinx.exe"
+        exe3.write_bytes(b"MZ")
+        port3 = pub3 / "portable"
+        port3.mkdir()
+
+        # Esegui la ricerca
+        with patch("winreg.OpenKey", side_effect=FileNotFoundError):
+            results = detector._find_portable_mode_windows()
+
+        assert port0 in results
+        assert port1 in results
+        assert port2 in results
+        assert port3 in results
+
 
 # ---------------------------------------------------------------------------
 # Test: get_ryujinx_structure

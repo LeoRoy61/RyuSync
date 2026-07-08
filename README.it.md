@@ -85,12 +85,10 @@ Segui questi passi nel menu interattivo:
 3. Storage: digita `drive` e premi Invio
 4. Client ID e Secret: lascia vuoti (premi Invio)
 5. Scope: `1` (accesso completo) — *vedi nota permessi minimi sotto*
-6. Root folder ID: lascia vuoto
-7. Service account: lascia vuoto
-8. Edit advanced config: `n`
-9. Use auto config: `y` → si aprirà il browser per l'autenticazione Google
-10. Team Drive: `n`
-11. Conferma con `y`
+6. Service account: lascia vuoto
+7. Use auto config: `y` → si aprirà il browser per l'autenticazione Google
+8. Team Drive: `n`
+9. Conferma con `y`
 
 Verifica:
 ```bash
@@ -98,10 +96,12 @@ rclone listremotes
 # Output atteso: gdrive:
 ```
 
-> **💡 Permessi OAuth minimi consigliati**: invece di concedere accesso completo a tutto Google Drive,
-> puoi limitare rclone a una cartella dedicata (es. `RyuSync/`).
-> Al passo 6, specifica il **Root folder ID** della cartella backup (visibile nell'URL di Google Drive).
-> Così rclone può accedere SOLO a quella cartella e non al resto del tuo Drive.
+> **💡 Nota sulla Configurazione Avanzata (Root folder ID / Permessi Minimi)**:
+> Se desideri limitare rclone a una cartella dedicata (consigliato per concedere solo i permessi minimi, es. `RyuSync/`):
+> 1. Quando viene richiesto `Edit advanced config?`, seleziona `y`.
+> 2. Cerca la voce `Root folder ID` e incolla l'ID della tua cartella di backup (visibile nell'URL di Google Drive).
+> 3. Per tutte le altre opzioni della configurazione avanzata, premi Invio per accettare i valori predefiniti.
+> In questo modo, rclone potrà accedere SOLO a quella specifica cartella.
 
 ### OneDrive
 
@@ -292,7 +292,7 @@ Anziché concedere accesso all'intero Google Drive:
 
 1. Crea una cartella dedicata su Google Drive (es. `RyuSync_Backup`)
 2. Copia il suo **ID cartella** dall'URL: `drive.google.com/drive/folders/`**`1ABC...XYZ`**
-3. Durante `rclone config`, al passo "Root folder ID", incolla questo ID
+3. Durante `rclone config`, scegli `y` per modificare la configurazione avanzata e, al passo "Root folder ID", incolla questo ID
 4. rclone potrà accedere **solo** a quella cartella
 
 ### Protezione file di configurazione locale
