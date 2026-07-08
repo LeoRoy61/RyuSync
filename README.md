@@ -1,76 +1,76 @@
 # RyuSync
 
-[![English](https://img.shields.io/badge/lang-English-blue)](README.en.md)
-[![Versione](https://img.shields.io/badge/versione-1.0.0-green)](https://github.com/ryusync/ryusync)
-[![Piattaforma](https://img.shields.io/badge/piattaforma-Windows-blue?logo=windows)](https://github.com/ryusync/ryusync)
+[![Italiano](https://img.shields.io/badge/lang-Italiano-green)](README.it.md)
+[![Version](https://img.shields.io/badge/version-1.0.0-green)](https://github.com/ryusync/ryusync)
+[![Platform](https://img.shields.io/badge/platform-Windows-blue?logo=windows)](https://github.com/ryusync/ryusync)
 [![Python](https://img.shields.io/badge/python-3.10%2B-yellow?logo=python)](https://python.org)
-[![Licenza](https://img.shields.io/badge/licenza-MIT-green)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Tests](https://github.com/ryusync/ryusync/actions/workflows/tests.yml/badge.svg)](https://github.com/ryusync/ryusync/actions)
 
-> **Backup e sincronizzazione sicura dei dati Ryujinx tra più PC Windows**
+> **Safe backup and synchronization of Ryujinx data across multiple Windows PCs**
 
-RyuSync è uno strumento CLI per **backup sicuro e additivo** delle configurazioni e dei salvataggi di [Ryujinx](https://ryujinx.org/) (emulatore Nintendo Switch) verso cloud (Google Drive, OneDrive, Mega) o storage locale/di rete. Funziona con **Windows Task Scheduler** — nessun daemon persistente, nessuna icona nel tray: si avvia, fa il suo lavoro, e termina.
+RyuSync is a CLI tool for **safe, additive backup** of [Ryujinx](https://ryujinx.org/) (Nintendo Switch emulator) configurations and save data to cloud storage (Google Drive, OneDrive, Mega) or local/network storage. It integrates with **Windows Task Scheduler** — no persistent daemon, no tray icon: it launches, does its job, and exits cleanly.
 
-![RyuSync CLI — menu interattivo](docs/ryusync_cli.jpg)
-
----
-
-## ✨ Caratteristiche principali
-
-- 🛡️ **Mai cancellare nulla** — solo aggiunta, mai sovrascrittura automatica
-- ⚡ **Rilevamento automatico** di Ryujinx (portable + AppData)
-- ☁️ **Cloud via rclone** (Google Drive, OneDrive, Mega) + storage locale e SMB
-- 🔄 **Sync bidirezionale additivo** — solo file mancanti o più nuovi
-- ⚠️ **Gestione conflitti** — entrambe le versioni salvate con `_CONFLICT_PC1/_CONFLICT_PC2`
-- 📋 **Log timestampato** per ogni operazione
-- 🔔 **Notifiche desktop** Windows (opzionali)
-- 🗜️ **Compressione .zip** opzionale pre-upload
-- ♻️ **Retention configurabile** (mantieni le ultime N versioni)
-- ✅ **Verifica integrità** SHA-256 o mtime+size
-- 🏃 **Modalità dry-run** — vedi cosa farebbe senza eseguire
-- 📅 **Task Scheduler** — cadenze da minuti a mesi, inclusa la chiusura di Ryujinx
+![RyuSync CLI — interactive menu](docs/ryusync_cli.jpg)
 
 ---
 
-## 📋 Requisiti
+## ✨ Key Features
 
-| Requisito | Versione |
-|-----------|----------|
-| Python | 3.10 o superiore |
+- 🛡️ **Never deletes anything** — additive-only, no automatic overwriting
+- ⚡ **Auto-detection** of Ryujinx installations (portable + AppData)
+- ☁️ **Cloud via rclone** (Google Drive, OneDrive, Mega) + local and SMB storage
+- 🔄 **Additive bidirectional sync** — only missing or newer files
+- ⚠️ **Conflict management** — both versions saved with `_CONFLICT_PC1/_CONFLICT_PC2`
+- 📋 **Timestamped logs** for every operation
+- 🔔 **Windows desktop notifications** (optional)
+- 🗜️ **Optional .zip compression** before upload
+- ♻️ **Configurable retention** (keep last N versions)
+- ✅ **Integrity verification** via SHA-256 or mtime+size
+- 🏃 **Dry-run mode** — preview what would happen without executing
+- 📅 **Task Scheduler** — intervals from minutes to months, including Ryujinx-close trigger
+
+---
+
+## 📋 Requirements
+
+| Requirement | Version |
+|-------------|---------|
+| Python | 3.10 or higher |
 | Windows | 10/11 (64-bit) |
-| [rclone](https://rclone.org/downloads/) | Ultima versione stabile |
+| [rclone](https://rclone.org/downloads/) | Latest stable version |
 
 ---
 
-## 🚀 Installazione
+## 🚀 Installation
 
-### 1. Clona il repository
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/ryusync/ryusync.git
 cd ryusync
 ```
 
-### 2. Installa le dipendenze Python
+### 2. Install Python dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Installa rclone
+### 3. Install rclone
 
-Scarica rclone dal sito ufficiale: **https://rclone.org/downloads/**
+Download rclone from the official website: **https://rclone.org/downloads/**
 
-Estrai `rclone.exe` e aggiungilo al PATH di Windows, oppure copialo nella cartella di RyuSync.
+Extract `rclone.exe` and add it to your Windows PATH, or copy it to the RyuSync folder.
 
-Verifica l'installazione:
+Verify installation:
 ```bash
 rclone version
 ```
 
 ---
 
-## ⚙️ Configurazione rclone (passo-passo)
+## ⚙️ Configuring rclone (Step-by-Step)
 
 ### Google Drive
 
@@ -78,37 +78,37 @@ rclone version
 rclone config
 ```
 
-Segui questi passi nel menu interattivo:
+Follow these steps in the interactive menu:
 
-1. Scegli `n` → **New remote**
-2. Nome: `gdrive` (o quello che preferisci)
-3. Storage: digita `drive` e premi Invio
-4. Client ID e Secret: lascia vuoti (premi Invio)
-5. Scope: `1` (accesso completo) — *vedi nota permessi minimi sotto*
-6. Root folder ID: lascia vuoto
-7. Service account: lascia vuoto
+1. Choose `n` → **New remote**
+2. Name: `gdrive` (or any name you prefer)
+3. Storage: type `drive` and press Enter
+4. Client ID and Secret: leave empty (press Enter)
+5. Scope: `1` (full access)
+6. Root folder ID: leave empty
+7. Service account: leave empty
 8. Edit advanced config: `n`
-9. Use auto config: `y` → si aprirà il browser per l'autenticazione Google
+9. Use auto config: `y` → browser will open for Google OAuth authentication
 10. Team Drive: `n`
-11. Conferma con `y`
+11. Confirm with `y`
 
-Verifica:
+Verify:
 ```bash
 rclone listremotes
-# Output atteso: gdrive:
+# Expected output: gdrive:
 ```
 
-> **💡 Permessi OAuth minimi consigliati**: invece di concedere accesso completo a tutto Google Drive,
-> puoi limitare rclone a una cartella dedicata (es. `RyuSync/`).
-> Al passo 6, specifica il **Root folder ID** della cartella backup (visibile nell'URL di Google Drive).
-> Così rclone può accedere SOLO a quella cartella e non al resto del tuo Drive.
+> **💡 Minimal OAuth permissions recommended**: instead of granting access to your entire Google Drive,
+> you can restrict rclone to a dedicated folder (e.g. `RyuSync/`).
+> At step 6, specify the **Root folder ID** of your backup folder (visible in the Google Drive URL).
+> This way rclone can ONLY access that specific folder.
 
 ### OneDrive
 
 ```bash
 rclone config
 # Storage: onedrive
-# Segui le istruzioni OAuth nel browser
+# Follow OAuth instructions in the browser
 ```
 
 ### Mega
@@ -116,54 +116,54 @@ rclone config
 ```bash
 rclone config
 # Storage: mega
-# Inserisci email e password Mega
+# Enter your Mega email and password
 ```
 
-### Verifica rapida
+### Quick Test
 
 ```bash
 rclone lsd gdrive:
-# Mostra le cartelle sul tuo Google Drive
+# Lists folders on your Google Drive
 ```
 
 ---
 
-## 🎮 Utilizzo
+## 🎮 Usage
 
-### Modalità interattiva (prima esecuzione)
+### Interactive mode (first run)
 
 ```bash
 python ryusync.py
 ```
 
-Il menu ti guiderà attraverso:
-1. **Azione**: Backup / Ripristino / Sync bidirezionale
-2. **Contenuti**: salvataggi, Mii, sistema, config, mod, ROM (opzionale), shader cache (esclusa default)
-3. **Destinazione**: Google Drive, OneDrive, Mega, SSD locale, SMB
-4. **Pianificazione**: dopo il primo backup riuscito, puoi schedulare i backup automatici
+The menu will guide you through:
+1. **Action**: Backup / Restore / Bidirectional Sync
+2. **Contents**: saves, Mii, system, config, mods, ROMs (optional), shader cache (excluded by default)
+3. **Destination**: Google Drive, OneDrive, Mega, local SSD, SMB
+4. **Scheduling**: after the first successful backup, you can set up automatic backups
 
-### Modalità dry-run (mostra senza eseguire)
+### Dry-run mode (preview without executing)
 
 ```bash
 python ryusync.py --dry-run
 ```
 
-### Backup automatico (Task Scheduler)
+### Automatic backup (Task Scheduler)
 
-Configurato automaticamente al termine del primo backup interattivo.
-Puoi anche avviarlo manualmente:
+Configured automatically at the end of the first interactive backup.
+You can also launch it manually:
 
 ```bash
 python ryusync.py --mode=incremental --silent
 ```
 
-### Rimuovi pianificazione
+### Remove scheduling
 
 ```bash
 python ryusync.py --unschedule
 ```
 
-### Aiuto
+### Help
 
 ```bash
 python ryusync.py --help
@@ -171,154 +171,156 @@ python ryusync.py --help
 
 ---
 
-## 📅 Pianificazione automatica — Cadenze disponibili
+## 📅 Automatic Scheduling — Available Frequencies
 
-Dopo il primo backup riuscito, RyuSync ti chiede se vuoi pianificare backup automatici.
-Scegli la cadenza più adatta alle tue esigenze:
+After the first successful backup, RyuSync asks whether you want to schedule automatic backups.
+Choose the frequency that best fits your needs:
 
-| # | Cadenza | Implementazione Windows |
-|---|---------|------------------------|
-| 1 | Ogni ora | `schtasks /sc HOURLY /mo 1` |
-| 2 | Ogni 6 ore | `schtasks /sc HOURLY /mo 6` |
-| 3 | Una volta al giorno | `schtasks /sc DAILY /mo 1 /st 03:00` |
-| 4 | Ogni 3 giorni | `schtasks /sc DAILY /mo 3 /st 03:00` |
-| 5 | Una volta a settimana | `schtasks /sc WEEKLY /mo 1 /st 03:00` |
-| 6 | Una volta al mese | `schtasks /sc MONTHLY /mo 1 /st 03:00` |
-| 7 | All'avvio del PC | `schtasks /sc ONSTART` |
-| 8 | Alla chiusura di Ryujinx | Task watcher ogni 5 min via psutil |
-| 9 | Personalizzato | es. ogni 10 giorni → `/sc DAILY /mo 10` |
-| 10 | Nessuna pianificazione | — |
+| # | Frequency | Windows Implementation |
+|---|-----------|----------------------|
+| 1 | Every hour | `schtasks /sc HOURLY /mo 1` |
+| 2 | Every 6 hours | `schtasks /sc HOURLY /mo 6` |
+| 3 | Once a day | `schtasks /sc DAILY /mo 1 /st 03:00` |
+| 4 | Every 3 days | `schtasks /sc DAILY /mo 3 /st 03:00` |
+| 5 | Once a week | `schtasks /sc WEEKLY /mo 1 /st 03:00` |
+| 6 | Once a month | `schtasks /sc MONTHLY /mo 1 /st 03:00` |
+| 7 | On PC startup | `schtasks /sc ONSTART` |
+| 8 | On Ryujinx close | Watcher task every 5 min via psutil |
+| 9 | Custom | e.g. every 10 days → `/sc DAILY /mo 10` |
+| 10 | No scheduling | — |
 
-**Esempio personalizzato**: "ogni 10 giorni" →
+**Custom example**: "every 10 days" →
 ```
-Valore: 10
-Unità: giorni
+Value: 10
+Unit: days
 → schtasks /sc DAILY /mo 10 /st 03:00
 ```
 
-> **Perché Task Scheduler e non un processo persistente?**
-> Un task pianificato di Windows si avvia, fa il suo lavoro e **termina completamente**.
-> Non consuma RAM in background, non interferisce con Ryujinx durante il gioco,
-> e sopravvive ai riavvii senza configurazione aggiuntiva.
-> È l'approccio più robusto e meno invasivo per backup automatici su Windows.
+> **Why Task Scheduler instead of a persistent process?**
+> A Windows scheduled task launches, does its work and **exits completely**.
+> It consumes no background RAM, doesn't interfere with Ryujinx during gameplay,
+> and survives reboots without additional configuration.
+> It's the most robust and least invasive approach for automatic backups on Windows.
 
 ---
 
-## 🏗️ Struttura del progetto
+## 🏗️ Project Structure
 
 ```
 RyuSync/
-├── ryusync.py          # Entry point principale
-├── detector.py         # Rilevamento automatico Ryujinx
-├── backup_engine.py    # Logica backup/sync/conflitti/integrità
-├── scheduler.py        # Integrazione Windows Task Scheduler
-├── config.yaml         # Configurazione persistente (auto-generata)
-├── requirements.txt    # Dipendenze Python
+├── ryusync.py          # Main entry point
+├── detector.py         # Ryujinx automatic detection
+├── backup_engine.py    # Backup/sync/conflict/integrity logic
+├── scheduler.py        # Windows Task Scheduler integration
+├── config.yaml         # Persistent configuration (auto-generated)
+├── requirements.txt    # Python dependencies
 ├── .gitignore
 ├── LICENSE             # MIT
-├── README.md           # Questa guida (Italiano)
-├── README.en.md        # Guida in inglese
-├── logs/               # Log operazioni (auto-generati)
+├── README.md           # Italian guide
+├── README.en.md        # This guide (English)
+├── logs/               # Operation logs (auto-generated)
 ├── tests/
-│   ├── conftest.py     # Fixtures pytest
+│   ├── conftest.py     # pytest fixtures
 │   ├── test_detector.py
 │   └── test_backup_engine.py
 └── .github/
     └── workflows/
-        └── tests.yml   # CI su Windows (Python 3.10-3.13)
+        └── tests.yml   # CI on Windows (Python 3.10-3.13)
 ```
 
 ---
 
-## 🛡️ Principio di sicurezza
+## 🛡️ Safety Principle
 
-RyuSync è progettato con un principio fondamentale:
+RyuSync is designed with a fundamental principle:
 
-> **Non cancella mai nulla. Non sovrascrive mai automaticamente.**
+> **Never delete anything. Never overwrite automatically.**
 
-| Scenario | Comportamento |
-|----------|--------------|
-| File mancante a destinazione | ✅ Copia |
-| File identico a destinazione | ⏭️ Salta |
-| File locale più recente | ✅ Copia |
-| File remoto più recente | ⚠️ Avvisa, chiede conferma |
-| File con contenuto diverso (conflitto) | 💾 Salva entrambe le versioni con `_CONFLICT_` |
-| File presente solo a destinazione | 🔒 Non tocca mai |
+| Scenario | Behavior |
+|----------|----------|
+| File missing at destination | ✅ Copy |
+| Identical file at destination | ⏭️ Skip |
+| Newer local file | ✅ Copy |
+| Newer remote file | ⚠️ Warn, ask for confirmation |
+| File with different content (conflict) | 💾 Save both versions with `_CONFLICT_` |
+| File present only at destination | 🔒 Never touched |
 
-## 🔒 Sicurezza delle credenziali rclone
+---
 
-> ⚠️ **Punto critico spesso sottovalutato**: `rclone.conf` memorizza token OAuth e chiavi API
-> in chiaro o con offuscamento minimo. Chiunque acceda a questo file può usare i tuoi account cloud.
+## 🔒 Securing rclone Credentials
 
-### Controlla se rclone.conf è cifrato
+> ⚠️ **Critical point often overlooked**: `rclone.conf` stores OAuth tokens and API keys in
+> plain text or with minimal obfuscation. Anyone who can access this file can use your cloud accounts.
 
-RyuSync avvisa automaticamente all'avvio se il tuo `rclone.conf` non è cifrato.
-Puoi anche controllare manualmente:
+### Check if rclone.conf is encrypted
+
+RyuSync automatically warns you at startup if your `rclone.conf` is not encrypted.
+You can also check manually:
 
 ```bash
-# Dove si trova il tuo rclone.conf:
+# Find where your rclone.conf is:
 rclone config file
 
-# Se il file inizia con sezioni come [gdrive], [onedrive]...
-# → NON è cifrato. Segui la guida sotto.
+# If the file starts with sections like [gdrive], [onedrive]...
+# → It is NOT encrypted. Follow the guide below.
 
-# Se inizia con "# Encrypted rclone configuration File"
-# → Ottimo! Sei al sicuro.
+# If it starts with "# Encrypted rclone configuration File"
+# → Great! You are protected.
 ```
 
-### Imposta la cifratura AES-256 su rclone.conf
+### Enable AES-256 encryption on rclone.conf
 
 ```bash
 rclone config
-# Nel menu principale scegli: s) Set configuration password
-# Inserisci una password sicura e confermala
-# Il file verrà cifrato con AES-256 (GCM)
+# In the main menu, choose: s) Set configuration password
+# Enter a strong password and confirm it
+# The file will be encrypted with AES-256 (GCM)
 ```
 
-Dopo aver impostato la password, rclone la chiederà ad ogni esecuzione.
-Per l'uso con Task Scheduler (senza prompt interattivo), impostala come variabile d'ambiente:
+After setting the password, rclone will ask for it on every run.
+For use with Task Scheduler (no interactive prompt), set it as an environment variable:
 
 ```powershell
-# In PowerShell (sessione corrente)
-$env:RCLONE_CONFIG_PASS = "la-tua-password"
+# In PowerShell (current session)
+$env:RCLONE_CONFIG_PASS = "your-password"
 
-# In modo persistente (solo per l'utente corrente)
-[System.Environment]::SetEnvironmentVariable("RCLONE_CONFIG_PASS", "la-tua-password", "User")
+# Persistently (current user only)
+[System.Environment]::SetEnvironmentVariable("RCLONE_CONFIG_PASS", "your-password", "User")
 ```
 
-### Permessi OAuth minimi consigliati
+### Minimal OAuth Permissions
 
-Anziché concedere accesso all'intero Google Drive:
+Instead of granting access to your entire Google Drive:
 
-1. Crea una cartella dedicata su Google Drive (es. `RyuSync_Backup`)
-2. Copia il suo **ID cartella** dall'URL: `drive.google.com/drive/folders/`**`1ABC...XYZ`**
-3. Durante `rclone config`, al passo "Root folder ID", incolla questo ID
-4. rclone potrà accedere **solo** a quella cartella
+1. Create a dedicated folder on Google Drive (e.g. `RyuSync_Backup`)
+2. Copy its **folder ID** from the URL: `drive.google.com/drive/folders/`**`1ABC...XYZ`**
+3. During `rclone config`, at the "Root folder ID" step, paste this ID
+4. rclone will be able to access **only** that folder
 
-### Protezione file di configurazione locale
+### Local Config File Protection
 
-RyuSync applica automaticamente permessi ristretti a `config.yaml` tramite `icacls`.
-Verifica che i tuoi file siano protetti:
+RyuSync automatically applies restricted permissions to `config.yaml` via `icacls`.
+Verify your files are protected:
 
 ```powershell
-# Controlla i permessi di config.yaml
+# Check config.yaml permissions
 icacls config.yaml
 
-# Controlla i permessi di rclone.conf
+# Check rclone.conf permissions
 icacls "%APPDATA%\rclone\rclone.conf"
 ```
 
 ---
 
+## 🔧 Configuration (config.yaml)
 
-Dopo la prima esecuzione interattiva, `config.yaml` viene creato automaticamente
-con permessi ristretti (solo l'utente corrente può leggerlo).
+After the first interactive run, `config.yaml` is automatically created with restricted permissions (only the current user can read it).
 
-Parametri principali:
+Main parameters:
 
 ```yaml
-ryujinx_path: "C:\\Users\\Nome\\AppData\\Roaming\\Ryujinx"
-pc_name: "PC-Gaming"
+ryujinx_path: "C:\\Users\\Name\\AppData\\Roaming\\Ryujinx"
+pc_name: "Gaming-PC"
 destination_type: "gdrive"
 destination_path: "gdrive:RyuSync"
 
@@ -328,10 +330,10 @@ contents:
   system: true
   config: true
   mods: true
-  roms: false           # Opzionale, avvisa se >5GB
-  shader_cache: false   # Esclusa default (rigenerabile)
+  roms: false           # Optional, warns if >5GB
+  shader_cache: false   # Excluded by default (regeneratable)
 
-integrity_method: "mtime_size"   # o "sha256"
+integrity_method: "mtime_size"   # or "sha256"
 compress_before_upload: false
 keep_versions: 3
 size_warning_threshold_gb: 5.0
@@ -340,73 +342,71 @@ desktop_notifications: true
 
 ---
 
-## 🧪 Esecuzione dei test
+## 🧪 Running the Tests
 
 ```bash
 python -m pytest tests/ -v
 ```
 
-Output atteso: **48 test PASSED** ✅
+Expected output: **48 tests PASSED** ✅
 
 ---
 
-## 📊 Struttura dati Ryujinx gestita
+## 📊 Ryujinx Data Structure Handled
 
-| Percorso | Contenuto | Default |
-|----------|-----------|---------|
-| `bis/user/save/` | Salvataggi per ID titolo | ✅ incluso |
-| `bis/user/save/*/mii/` | Dati Mii | ✅ incluso |
-| `bis/system/` | Dati di sistema e account | ✅ incluso |
-| `Config.json` | Impostazioni generali | ✅ incluso |
-| `mods/` | Mod dei giochi | ✅ incluso |
-| `games/` (o path da Config) | ROM/ISO | ❌ escluso (opzionale) |
-| Shader cache | Cache shader | ❌ escluso (rigenerabile) |
+| Path | Content | Default |
+|------|---------|---------|
+| `bis/user/save/` | Save data by title ID | ✅ included |
+| `bis/user/save/*/mii/` | Mii data | ✅ included |
+| `bis/system/` | System data and accounts | ✅ included |
+| `Config.json` | General settings | ✅ included |
+| `mods/` | Game mods | ✅ included |
+| `games/` (or path from Config) | ROMs/ISOs | ❌ excluded (optional) |
+| Shader cache | Shader cache | ❌ excluded (regeneratable) |
 
 ---
 
 ## 🗺️ Roadmap
 
-### v1.0 (attuale) — Solo Windows
-- ✅ Backup additivo (mai cancellazione)
-- ✅ Gestione conflitti multi-PC
-- ✅ rclone cloud + storage locale/SMB
+### v1.0 (current) — Windows only
+- ✅ Additive backup (no deletion)
+- ✅ Multi-PC conflict management
+- ✅ rclone cloud + local/SMB storage
 - ✅ Windows Task Scheduler
-- ✅ Notifiche desktop Windows
-- ✅ Test suite (48 test)
+- ✅ Windows desktop notifications
+- ✅ Test suite (48 tests)
 
-### v2.0 (futura) — Se il progetto avrà seguito
+### v2.0 (future) — If the project gains traction
 
-Il supporto a **Linux** e **macOS** è pianificato per una versione futura.
-L'architettura del codice è già predisposta con funzioni `detect_ryujinx_path(os_name)`
-e `create_scheduled_task(os_name, frequency)` che oggi gestiscono solo `"windows"`,
-ma sono pronte per ricevere i branch `"linux"` e `"darwin"` senza modificare la logica core.
+**Linux** and **macOS** support is planned for a future version.
+The codebase is already architected with `detect_ryujinx_path(os_name)` and `create_scheduled_task(os_name, frequency)` functions that currently only handle `"windows"`, but are ready to receive `"linux"` and `"darwin"` branches without rewriting the core logic.
 
-**Linux**: rilevamento in `~/.config/Ryujinx`, pianificazione via systemd timer o crontab.
-**macOS**: rilevamento in `~/Library/Application Support/Ryujinx`, pianificazione via launchd.
+**Linux**: detection in `~/.config/Ryujinx`, scheduling via systemd timer or crontab.
+**macOS**: detection in `~/Library/Application Support/Ryujinx`, scheduling via launchd.
 
-> 💡 Vuoi contribuire al supporto Linux/macOS? Apri una issue o una PR su GitHub!
+> 💡 Want to contribute Linux/macOS support? Open an issue or PR on GitHub!
 
 ---
 
-## 📝 Licenza
+## 📝 License
 
-MIT — vedi [LICENSE](LICENSE)
+MIT — see [LICENSE](LICENSE)
 
 ---
 
-## 🤝 Contribuire
+## 🤝 Contributing
 
-Leggi la guida completa in [CONTRIBUTING.md](CONTRIBUTING.md).
+See the full guide in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-1. Fork del repository
-2. Crea un branch: `git checkout -b feature/nome-feature`
-3. Aggiungi test per le nuove funzionalità
-4. Apri una Pull Request
+1. Fork the repository
+2. Create a branch: `git checkout -b feature/feature-name`
+3. Add tests for new functionality
+4. Open a Pull Request
 
-I test devono passare su Windows con Python 3.10+ prima del merge.
+Tests must pass on Windows with Python 3.10+ before merging.
 
 ---
 
 ## 📅 Changelog
 
-Vedi [CHANGELOG.md](CHANGELOG.md) per la storia completa delle versioni.
+See [CHANGELOG.md](CHANGELOG.md) for the full version history.

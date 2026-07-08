@@ -33,7 +33,7 @@ Apri una issue usando il template "Bug Report" e includi:
 
 Apri una issue con etichetta `enhancement`. Prima di proporre:
 
-- Controlla la [Roadmap](README.md#️-roadmap) — potrebbe essere già pianificata.
+- Controlla la [Roadmap](README.it.md#️-roadmap) — potrebbe essere già pianificata.
 - Spiega perché la funzionalità sarebbe utile per più utenti, non solo per te.
 
 ---
