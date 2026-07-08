@@ -77,5 +77,5 @@ e questo progetto adotta il [Versionamento Semantico](https://semver.org/lang/it
 
 ---
 
-[Unreleased]: https://github.com/ryusync/ryusync/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/ryusync/ryusync/releases/tag/v1.0.0
+[Unreleased]: https://github.com/LeoRoy61/RyuSync/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/LeoRoy61/RyuSync/releases/tag/v1.0.0

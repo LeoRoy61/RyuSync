@@ -1,11 +1,11 @@
 # RyuSync
 
 [![English](https://img.shields.io/badge/lang-English-blue)](README.md)
-[![Versione](https://img.shields.io/badge/versione-1.0.0-green)](https://github.com/ryusync/ryusync)
-[![Piattaforma](https://img.shields.io/badge/piattaforma-Windows-blue?logo=windows)](https://github.com/ryusync/ryusync)
+[![Versione](https://img.shields.io/badge/versione-1.0.0-green)](https://github.com/LeoRoy61/RyuSync)
+[![Piattaforma](https://img.shields.io/badge/piattaforma-Windows-blue?logo=windows)](https://github.com/LeoRoy61/RyuSync)
 [![Python](https://img.shields.io/badge/python-3.10%2B-yellow?logo=python)](https://python.org)
 [![Licenza](https://img.shields.io/badge/licenza-MIT-green)](LICENSE)
-[![Tests](https://github.com/ryusync/ryusync/actions/workflows/tests.yml/badge.svg)](https://github.com/ryusync/ryusync/actions)
+[![Tests](https://github.com/LeoRoy61/RyuSync/actions/workflows/tests.yml/badge.svg)](https://github.com/LeoRoy61/RyuSync/actions)
 
 > **Backup e sincronizzazione sicura dei dati Ryujinx tra più PC Windows**
 
@@ -47,7 +47,7 @@ RyuSync è uno strumento CLI per **backup sicuro e additivo** delle configurazio
 ### 1. Clona il repository
 
 ```bash
-git clone https://github.com/ryusync/ryusync.git
+git clone https://github.com/LeoRoy61/RyuSync.git
 cd ryusync
 ```
 

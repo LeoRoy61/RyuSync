@@ -8,7 +8,7 @@ Questo documento spiega come segnalare bug, proporre funzionalità e sottometter
 
 ## 📋 Prima di aprire una Issue
 
-- **Cerca prima** tra le [issue esistenti](https://github.com/ryusync/ryusync/issues) per evitare duplicati.
+- **Cerca prima** tra le [issue esistenti](https://github.com/LeoRoy61/RyuSync/issues) per evitare duplicati.
 - Per bug, includi sempre: versione Python, versione Windows, output dell'errore.
 - Per richieste di funzionalità, spiega il caso d'uso concreto.
 
@@ -43,7 +43,7 @@ Apri una issue con etichetta `enhancement`. Prima di proporre:
 ### Setup dell'ambiente
 
 ```bash
-git clone https://github.com/ryusync/ryusync.git
+git clone https://github.com/LeoRoy61/RyuSync.git
 cd ryusync
 python -m venv venv
 venv\Scripts\activate         # Windows
