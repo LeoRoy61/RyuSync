@@ -1,0 +1,23 @@
+# RyuSync v1.0 - Windows only
+# Python 3.10+ required
+
+# CLI & UX
+rich>=13.7.0
+questionary>=2.0.1
+
+# Configuration
+PyYAML>=6.0.1
+
+# Process detection (for Ryujinx close detection)
+psutil>=5.9.8
+
+# Desktop notifications (Windows)
+plyer>=2.1.0
+
+# Testing
+pytest>=8.0.0
+pytest-mock>=3.12.0
+
+# Note: rclone is a standalone binary, not a Python package.
+# Install from https://rclone.org/downloads/
+# hashlib, shutil, zipfile, subprocess are stdlib - no install needed

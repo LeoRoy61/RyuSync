@@ -1,0 +1,81 @@
+# RyuSync — .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+*.pyc
+*.pyo
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+nosetests.xml
+coverage.xml
+
+# Logs
+logs/
+*.log
+backup_log_*.txt
+
+# Config (may contain sensitive data - users should create their own)
+config.yaml
+
+# ⚠️  SECURITY: rclone config files contain OAuth tokens and API keys IN PLAIN TEXT.
+# NEVER commit these files. rclone.conf is typically at:
+#   Windows: %APPDATA%\rclone\rclone.conf
+#   Linux:   ~/.config/rclone/rclone.conf
+#   macOS:   ~/Library/Application Support/rclone/rclone.conf
+# If you store a local copy for any reason, add it here:
+rclone.conf
+rclone.conf.bak
+*.rclone.conf
+
+# Auto-generated watcher script (contains absolute paths)
+ryujinx_watcher.py
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# State files (Ryujinx close detection)
+ryusync_state.json
+
+# Distribution
+dist/
+build/

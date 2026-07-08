@@ -1,0 +1,52 @@
+# RyuSync Configuration File
+# Generated automatically on first run.
+# WARNING: This file may contain sensitive path information.
+# Permissions are restricted via icacls on Windows.
+# DO NOT commit this file to version control.
+
+# --- Ryujinx Data Source ---
+ryujinx_path: ""           # Auto-detected on first run, or set manually
+pc_name: ""                # Friendly name for this PC (used in conflict suffixes)
+
+# --- Destination ---
+destination_type: ""       # "gdrive" | "onedrive" | "mega" | "local" | "smb"
+destination_path: ""       # rclone remote (e.g. "gdrive:RyuSync") or local path
+
+# --- Content Selection ---
+# Which data categories to include in backup/sync
+contents:
+  saves: true              # bis/user/save/
+  mii: true                # Mii data (inside save/*/mii/)
+  system: true             # bis/system/
+  config: true             # Config.json
+  mods: true               # mods/
+  roms: false              # games/ or configured ROM folder (warn if >5GB)
+  shader_cache: false      # Shader cache (excluded by default - regeneratable)
+
+# --- Integrity Verification ---
+# "mtime_size" (fast) or "sha256" (thorough)
+integrity_method: "mtime_size"
+
+# --- Compression ---
+compress_before_upload: false   # Zip files before upload
+compression_level: 6            # zlib compression level (1-9)
+
+# --- Retention ---
+keep_versions: 3            # Number of local compressed backup versions to keep
+
+# --- Space Check ---
+size_warning_threshold_gb: 5.0  # Warn before operations exceeding this size (GB)
+
+# --- Notifications ---
+desktop_notifications: true     # Show Windows desktop notifications
+
+# --- Scheduling ---
+schedule_frequency: ""          # e.g. "daily", "weekly", "custom"
+schedule_custom_value: null     # e.g. 10
+schedule_custom_unit: null      # e.g. "days"
+
+# --- Dry Run ---
+dry_run: false              # If true, show actions without executing
+
+# --- Logging ---
+log_dir: "logs"             # Directory for log files (relative to ryusync.py)
