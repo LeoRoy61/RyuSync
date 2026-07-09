@@ -129,29 +129,18 @@ class TestSensitiveDataExposure:
             assert any("percorso assoluto del profilo utente" in w for w in warnings)
 
 
-# Test security warning notifications
-class TestSecurityWarningsAndNotifications:
-    @patch("security._are_notifications_enabled", return_value=True)
-    @patch("plyer.notification.notify")
-    def test_desktop_notification_triggered_when_unencrypted(self, mock_notify, mock_enabled, tmp_path: Path):
+# Test security logging warnings
+class TestSecurityWarningsLogging:
+    def test_logs_warning_when_unencrypted_in_silent_mode(self, tmp_path: Path):
         conf = tmp_path / "rclone.conf"
         conf.write_text("[gdrive]\ntype=drive\ntoken=secret\n")
         
         with patch.object(security, "get_rclone_conf_path", return_value=conf):
-            security.warn_if_unencrypted(silent=True, base_dir=tmp_path)
-            assert mock_notify.called
-            title = mock_notify.call_args[1].get("title", "")
-            assert "Warning" in title or "RyuSync" in title
-
-    @patch("security._are_notifications_enabled", return_value=False)
-    @patch("plyer.notification.notify")
-    def test_desktop_notification_not_triggered_when_disabled(self, mock_notify, mock_enabled, tmp_path: Path):
-        conf = tmp_path / "rclone.conf"
-        conf.write_text("[gdrive]\ntype=drive\ntoken=secret\n")
-        
-        with patch.object(security, "get_rclone_conf_path", return_value=conf):
-            security.warn_if_unencrypted(silent=True, base_dir=tmp_path)
-            assert not mock_notify.called
+            with patch("logging.Logger.warning") as mock_warn:
+                security.warn_if_unencrypted(silent=True, base_dir=tmp_path)
+                assert mock_warn.called
+                args, _ = mock_warn.call_args
+                assert "rclone.conf non cifrato" in args[0]
 
 
 # Test Silent Mode configuration error handling

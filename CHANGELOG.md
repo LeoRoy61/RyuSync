@@ -27,11 +27,11 @@ e questo progetto adotta il [Versionamento Semantico](https://semver.org/lang/it
 - **Integrazione Scenari**: Creazione della suite di test di integrazione automatizzata `tests/verify_scenarios.py` per testare tutte le combinazioni di contenuti, dry-run, GDrive e scenari di ripristino/recovery reali.
 
 #### Agente 4 — Audit di Sicurezza e QA (Questo Agent)
-- **Scansione Dati Sensibili**: Aggiunto il controllo `check_sensitive_data_exposure()` per esaminare `ryusync_state.json` e i file in `logs/` ed avvisare se contengono dati sensibili del PC locale (username, hostname, percorsi di profilo).
-- **Notifiche in Silent Mode**: Esteso `warn_if_unencrypted()` per inviare notifiche desktop e log di avviso in modalità silenziosa se viene rilevato un `rclone.conf` non cifrato o un'esposizione combinata di dati.
+- **Scansione Dati Sensibili**: Aggiunto il controllo `check_sensitive_data_exposure()` per esaminare `ryusync_state.json` e il file di log più recente ed avvisare se contengono dati sensibili del PC locale (username, hostname, percorsi di profilo).
+- **Notifiche in Silent Mode**: Esteso `warn_if_unencrypted()` per registrare avvisi nei log in modalità silenziosa se viene rilevato un `rclone.conf` non cifrato o un'esposizione combinata di dati.
 - **Deduplica Rilevamento**: Rilevamento Ryujinx (`detector.py`) ottimizzato per deduplicare logicamente i percorsi degli eseguibili (casing, slashes) tramite risoluzione dei percorsi canonici, eliminando doppi log o doppie ricerche.
-- **Suite di Test Estesa**: Aggiunta di `tests/test_watcher_and_silent.py` con 11 nuovi test per coprire watcher state corruption, modalità silent error handling, sensitive data exposure e notifiche.
-- **Aggiornamento QA**: Verifica e aggiornamento del numero di test passanti a **71** nei file `README.md` e `README.it.md`, e audit del workflow CI su GitHub Actions per assicurare il corretto funzionamento su Windows.
+- **Suite di Test Estesa**: Aggiunta di `tests/test_watcher_and_silent.py` con 10 nuovi test per coprire watcher state corruption, modalità silent error handling, sensitive data exposure e logging.
+- **Aggiornamento QA**: Verifica e aggiornamento del numero di test passanti a **70** nei file `README.md` e `README.it.md`, e audit del workflow CI su GitHub Actions per assicurare il corretto funzionamento su Windows.
 
 ---
 

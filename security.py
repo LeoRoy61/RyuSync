@@ -149,39 +149,9 @@ def check_rclone_security() -> dict:
 # Output interattivo e controlli di esposizione dati
 # ---------------------------------------------------------------------------
 
-def _are_notifications_enabled() -> bool:
-    """Verifica se le notifiche desktop sono abilitate in config.yaml."""
-    try:
-        config_path = Path(__file__).parent / "config.yaml"
-        if config_path.exists():
-            import yaml
-            with open(config_path, "r", encoding="utf-8") as f:
-                cfg = yaml.safe_load(f)
-                return bool(cfg.get("desktop_notifications", True))
-    except Exception:
-        pass
-    return True
-
-
-def _send_desktop_notification(title: str, message: str) -> None:
-    """Invia una notifica desktop se abilitata nelle impostazioni."""
-    if not _are_notifications_enabled():
-        return
-    try:
-        from plyer import notification
-        notification.notify(
-            title=title,
-            message=message,
-            app_name="RyuSync",
-            timeout=10,
-        )
-    except Exception:
-        pass
-
-
 def check_sensitive_data_exposure(base_dir: Optional[Path] = None) -> list[str]:
     """
-    Scansiona ryusync_state.json e i file di log in logs/ alla ricerca di informazioni
+    Scansiona ryusync_state.json e il log più recente alla ricerca di informazioni
     sensibili locali (come username, hostname o percorsi assoluti del profilo utente).
 
     Returns:
@@ -200,13 +170,18 @@ def check_sensitive_data_exposure(base_dir: Optional[Path] = None) -> list[str]:
     if state_file.exists():
         files_to_check.append(state_file)
 
+    # Controlla solo il log più recente della sessione
     logs_dir = base_dir / "logs"
     if logs_dir.exists() and logs_dir.is_dir():
         try:
-            for f in logs_dir.glob("*.txt"):
-                files_to_check.append(f)
-            for f in logs_dir.glob("*.log"):
-                files_to_check.append(f)
+            log_files = []
+            for pattern in ("*.txt", "*.log"):
+                for f in logs_dir.glob(pattern):
+                    log_files.append(f)
+            if log_files:
+                # Ordina per data di modifica crescente e controlla solo l'ultimo
+                log_files.sort(key=lambda x: x.stat().st_mtime)
+                files_to_check.append(log_files[-1])
         except Exception:
             pass
 
@@ -334,10 +309,10 @@ def print_security_check(base_dir: Optional[Path] = None) -> dict:
 def warn_if_unencrypted(silent: bool = False, base_dir: Optional[Path] = None) -> bool:
     """
     Avvisa l'utente se rclone.conf non è cifrato o se ci sono esposizioni di dati.
-    In modalità silent, logga ed invia notifiche desktop se abilitate.
+    In modalità silent, registra solo avvisi nei log.
 
     Args:
-        silent: Se True, non stampa output su console (solo logging e desktop notification).
+        silent: Se True, non stampa output su console (solo logging).
         base_dir: Percorso opzionale in cui cercare logs/ e ryusync_state.json (usato nei test).
 
     Returns:
@@ -361,25 +336,13 @@ def warn_if_unencrypted(silent: bool = False, base_dir: Optional[Path] = None) -
                 f"SICUREZZA: rclone.conf non cifrato ({result['path']}). "
                 "Esegui 'rclone config' e imposta una password di cifratura."
             )
-            _send_desktop_notification(
-                "RyuSync Security Warning",
-                "rclone.conf is not encrypted! Run 'rclone config' to set a password."
-            )
 
     # 2. Controllo dati sensibili esposti
     if sens_warnings:
         if silent:
             for w in sens_warnings:
                 log.warning(f"SICUREZZA (Esposizione dati): {w}")
-            # Se combinato con rclone.conf critico, manda notifica dedicata
-            if result["risk_level"] == "critical":
-                _send_desktop_notification(
-                    "RyuSync Security Warning",
-                    "Sensitive paths/info exposed in logs while rclone.conf is unencrypted!"
-                )
         else:
-            # Se non silent, ma rclone.conf non era critical,
-            # print_security_check non è stato chiamato sopra. Chiamiamolo ora.
             if result["risk_level"] != "critical":
                 print_security_check(base_dir=base_dir)
 
