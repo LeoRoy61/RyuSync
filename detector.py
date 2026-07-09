@@ -104,22 +104,40 @@ def _detect_windows() -> list[Path]:
         Lista di Path validi trovati (può essere vuota).
     """
     found: list[Path] = []
+    seen_found = set()
+
+    def add_found_dir(p: Path, mode: str):
+        try:
+            resolved = p.resolve()
+            resolved_str = str(resolved).lower()
+        except Exception:
+            resolved = p.absolute()
+            resolved_str = str(resolved).lower()
+
+        if resolved_str not in seen_found:
+            seen_found.add(resolved_str)
+            console.print(f"  [green]✓[/green] Trovata ({mode}): [dim]{p}[/dim]")
+            found.append(p)
 
     console.print("\n[bold cyan]🔍 Ricerca installazioni Ryujinx...[/bold cyan]")
 
     # --- 1. Modalità portable ---
     portable_paths = _find_portable_mode_windows()
     for p in portable_paths:
-        if validate_ryujinx_dir(p) and p not in found:
-            console.print(f"  [green]✓[/green] Trovata (portable): [dim]{p}[/dim]")
-            found.append(p)
+        try:
+            if validate_ryujinx_dir(p):
+                add_found_dir(p, "portable")
+        except (OSError, PermissionError):
+            pass
 
     # --- 2. Modalità default: %APPDATA%\Ryujinx ---
     appdata_path = _get_appdata_ryujinx_path()
-    if appdata_path and validate_ryujinx_dir(appdata_path):
-        if appdata_path not in found:
-            console.print(f"  [green]✓[/green] Trovata (AppData): [dim]{appdata_path}[/dim]")
-            found.append(appdata_path)
+    if appdata_path:
+        try:
+            if validate_ryujinx_dir(appdata_path):
+                add_found_dir(appdata_path, "AppData")
+        except (OSError, PermissionError):
+            pass
 
     return found
 
@@ -135,33 +153,72 @@ def _find_portable_mode_windows() -> list[Path]:
     """
     candidates: list[Path] = []
     ryujinx_exe_paths: list[Path] = []
+    seen_exes = set()
+
+    def add_exe_path(p: Path):
+        try:
+            resolved = p.resolve()
+            resolved_str = str(resolved).lower()
+            if resolved_str not in seen_exes:
+                seen_exes.add(resolved_str)
+                ryujinx_exe_paths.append(resolved)
+        except (OSError, PermissionError, ValueError):
+            p_str = str(p.absolute()).lower()
+            if p_str not in seen_exes:
+                seen_exes.add(p_str)
+                ryujinx_exe_paths.append(p.absolute())
 
     # Cerca in PATH
     path_dirs = os.environ.get("PATH", "").split(os.pathsep)
     for dir_str in path_dirs:
+        if not dir_str.strip():
+            continue
         exe = Path(dir_str) / "Ryujinx.exe"
-        if exe.exists():
-            ryujinx_exe_paths.append(exe)
+        try:
+            if exe.is_file():
+                add_exe_path(exe)
+        except (OSError, PermissionError):
+            pass
 
     # Cerca in cartelle comuni Windows
-    common_dirs = [
-        Path(os.environ.get("ProgramFiles", "C:\\Program Files")),
-        Path(os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)")),
-        Path(os.environ.get("LOCALAPPDATA", "")) / "Programs",
-        Path.home() / "AppData" / "Local" / "Programs",
-        Path.home() / "Downloads",
+    common_dirs = []
+    
+    pf = os.environ.get("ProgramFiles")
+    if pf:
+        common_dirs.append(Path(pf))
+    else:
+        common_dirs.append(Path("C:\\Program Files"))
+        
+    pf86 = os.environ.get("ProgramFiles(x86)")
+    if pf86:
+        common_dirs.append(Path(pf86))
+    else:
+        common_dirs.append(Path("C:\\Program Files (x86)"))
+        
+    local_appdata = os.environ.get("LOCALAPPDATA")
+    if local_appdata:
+        common_dirs.append(Path(local_appdata) / "Programs")
+        
+    try:
+        common_dirs.append(Path.home() / "AppData" / "Local" / "Programs")
+        common_dirs.append(Path.home() / "Downloads")
+    except Exception:
+        pass
+        
+    common_dirs.extend([
         Path("C:\\Ryujinx"),
         Path("D:\\Ryujinx"),
         Path("E:\\Ryujinx"),
-    ]
+    ])
+
     for common_dir in common_dirs:
         try:
-            if common_dir.exists():
+            if common_dir.exists() and common_dir.is_dir():
                 # Check depth 0: directly in the common directory
                 exe0 = common_dir / "Ryujinx.exe"
                 try:
-                    if exe0.is_file() and exe0 not in ryujinx_exe_paths:
-                        ryujinx_exe_paths.append(exe0)
+                    if exe0.is_file():
+                        add_exe_path(exe0)
                 except (OSError, PermissionError):
                     pass
 
@@ -172,8 +229,8 @@ def _find_portable_mode_windows() -> list[Path]:
                             if entry.is_dir():
                                 # Depth 1: entry / "Ryujinx.exe"
                                 exe1 = entry / "Ryujinx.exe"
-                                if exe1.is_file() and exe1 not in ryujinx_exe_paths:
-                                    ryujinx_exe_paths.append(exe1)
+                                if exe1.is_file():
+                                    add_exe_path(exe1)
 
                                 # Depth 2: entry / "publish" / "Ryujinx.exe" or entry / "ryujinx-publish" / "Ryujinx.exe"
                                 for pub_name in ("publish", "ryujinx-publish"):
@@ -181,8 +238,8 @@ def _find_portable_mode_windows() -> list[Path]:
                                     try:
                                         if pub_dir.is_dir():
                                             exe2 = pub_dir / "Ryujinx.exe"
-                                            if exe2.is_file() and exe2 not in ryujinx_exe_paths:
-                                                ryujinx_exe_paths.append(exe2)
+                                            if exe2.is_file():
+                                                add_exe_path(exe2)
                                     except (OSError, PermissionError):
                                         pass
                         except (OSError, PermissionError):
@@ -198,16 +255,24 @@ def _find_portable_mode_windows() -> list[Path]:
         with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key_path) as key:
             exe_path_str, _ = winreg.QueryValueEx(key, "")
             exe_path = Path(exe_path_str)
-            if exe_path.exists() and exe_path not in ryujinx_exe_paths:
-                ryujinx_exe_paths.append(exe_path)
+            if exe_path.exists():
+                add_exe_path(exe_path)
     except (FileNotFoundError, OSError):
         pass
 
     # Per ogni eseguibile trovato, controlla se esiste 'portable'
     for exe in ryujinx_exe_paths:
-        portable_dir = exe.parent / "portable"
-        if portable_dir.exists():
-            candidates.append(portable_dir)
+        try:
+            portable_dir = exe.parent / "portable"
+            if portable_dir.exists() and portable_dir.is_dir():
+                try:
+                    resolved_cand = portable_dir.resolve()
+                except Exception:
+                    resolved_cand = portable_dir.absolute()
+                if resolved_cand not in candidates:
+                    candidates.append(resolved_cand)
+        except (OSError, PermissionError):
+            pass
 
     return candidates
 
@@ -220,7 +285,11 @@ def _get_appdata_ryujinx_path() -> Optional[Path]:
     if not appdata:
         return None
     path = Path(appdata) / "Ryujinx"
-    return path if path.exists() else None
+    try:
+        return path if path.exists() else None
+    except (OSError, PermissionError):
+        return None
+
 
 
 # ---------------------------------------------------------------------------

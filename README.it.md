@@ -346,7 +346,7 @@ desktop_notifications: true
 python -m pytest tests/ -v
 ```
 
-Output atteso: **48 test PASSED** ✅
+Output atteso: **71 test PASSED** ✅
 
 ---
 
@@ -372,7 +372,7 @@ Output atteso: **48 test PASSED** ✅
 - ✅ rclone cloud + storage locale/SMB
 - ✅ Windows Task Scheduler
 - ✅ Notifiche desktop Windows
-- ✅ Test suite (48 test)
+- ✅ Test suite (71 test)
 
 ### v2.0 (futura) — Se il progetto avrà seguito
 
